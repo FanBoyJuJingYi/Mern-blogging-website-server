@@ -1,5 +1,2 @@
-POST http://localhost:3000/signup 
-Content-Type: application/json
+Get http://localhost:3000/get-upload-url-2
 
-{  
-}

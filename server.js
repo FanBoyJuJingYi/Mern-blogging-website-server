@@ -8,8 +8,18 @@ import cors from 'cors';
 import admin from "firebase-admin"
 import serviceAccountKey from "./reat-js-blog-website-firebase-adminsdk-pxagl-de1b80e4f8.json" assert { type: "json" };
 import { getAuth } from "firebase-admin/auth";
+import aws from "aws-sdk"
+import path from 'path'
+import fs from 'fs'
+import fileUpload from 'express-fileupload';
 //schema
 import User from './Schema/User.js';
+// const { v4: uuidv4 } = require('uuid');
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { url } from 'inspector';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const server = express();
 let PORT = 3000;
@@ -23,10 +33,133 @@ let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for pass
 
 server.use(express.json());
 server.use(cors());
+server.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: path.join(__dirname, './tmp')
+}));
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
 })
+
+// setting up s3 bucket
+
+
+const s3 = new aws.S3({
+    region: 'ap-southeast-2',
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+})
+
+// clint -> /upload -> s3
+
+
+const generateUploadURL = async () => {
+    const date = new Date();
+    const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+    return await s3.getSignedUrlPromise('putObject', {
+        Bucket: 'bloogging-website',
+        Key: imageName,
+        Expires: 1000,
+        ContentType: "image/jpeg"
+    })
+}
+// client -> server -> upload s3
+
+
+// // clientn -> serer : from data
+// // server: luu vao storage cua server -> 
+// // upload image to s3
+
+// client -> upload url + /image path
+function uploadToS3(bucketName, keyPrefix, filePath) {
+    // ex: /path/to/my-picture.png becomes my-picture.png
+    var fileName = path.basename(filePath);
+    var fileStream = fs.createReadStream(filePath);
+
+    // If you want to save to "my-bucket/{prefix}/{filename}"
+    //                    ex: "my-bucket/my-pictures-folder/my-picture.png"
+    var keyName = path.join(keyPrefix, fileName);
+
+    // We wrap this in a promise so that we can handle a fileStream error
+    // since it can happen *before* s3 actually reads the first 'data' event
+    return new Promise(function (resolve, reject) {
+        fileStream.once('error', reject);
+        s3.upload(
+            {
+                Bucket: bucketName,
+                Key: keyName,
+                Body: fileStream
+            }
+        ).promise().then(resolve, reject);
+    });
+}
+
+server.post('/upload-image', async (req, res) => {
+    try {
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+
+        const image = req.files.img;
+        console.log(image)
+        const uploadUrl = await uploadToS3('bloogging-website-1', 'images', image.tempFilePath);
+        res.status(200).json({ uploadUrl });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// server.get('/get-upload-url-2', async (req, res) => {
+//     try {
+//         const imgKey = "images\\tmp-1-1710647432413"
+//         const url = await s3.getObject({
+//             Bucket: 'bloogging-website',
+//             Key: imgKey
+//         }).promise(
+//         });
+
+//         console.log('url', url)
+//         res.status(200).json({ url }); // Trả về URL tải lên trong phản hồi
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).json({ error: err.message });
+//     }
+// });
+
+
+server.get('/get-upload-url-2', async (req, res) => {
+    try {
+        const imgKey = "images/tmp-1-1710648905089";
+        // const url = await s3.getObject({
+        //     Bucket: 'bloogging-website-1',
+        //     Key: imgKey
+        // }).promise();
+        const url = await s3.getSignedUrlPromise('putObject', {
+            Bucket: 'bloogging-website-1',
+            Key: imgKey,
+        })
+        console.log('url', url);
+        res.status(200).json({ url }); // Return the upload URL in the response
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+server.get('/get-upload-url', async (req, res) => {
+    try {
+        const uploadUrl = await generateUploadURL();
+        res.status(200).json({ uploadUrl }); // Trả về URL tải lên trong phản hồi
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 const formatDatatoSend = (user) => {
     const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY); // SECRET ACCESS KEY là mã để đối chiếu có phải là người dùng không
