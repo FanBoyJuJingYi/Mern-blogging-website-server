@@ -1,2 +1,2 @@
-Get http://localhost:3000/get-upload-url-2
+PUT 
 
