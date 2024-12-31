@@ -28,8 +28,8 @@ const notificationSchema = mongoose.Schema({
     reply: {
         type: Schema.Types.ObjectId,
         ref: 'comments'
-    }, 
-    replied_on_comment:{
+    },
+    replied_on_comment: {
         type: Schema.Types.ObjectId,
         ref: 'comments'
     },
@@ -38,9 +38,9 @@ const notificationSchema = mongoose.Schema({
         default: false
     }
 },
-{
-    timestamps: true
-}
+    {
+        timestamps: true
+    }
 )
 
 export default mongoose.model("notification", notificationSchema)

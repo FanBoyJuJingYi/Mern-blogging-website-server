@@ -1,2 +1,8 @@
-PUT 
+POST http://localhost:3000//delete-comment
+Content-Type: application/json
 
+
+
+{
+  "blog_id": "Blog-9wBlrQFWAdJg4NKnH2m7yX"
+}

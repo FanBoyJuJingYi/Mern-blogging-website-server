@@ -60,12 +60,12 @@ const blogSchema = mongoose.Schema({
         default: false
     }
 
-}, 
-{ 
-    timestamps: {
-        createdAt: 'publishedAt'
-    } 
+},
+    {
+        timestamps: {
+            createdAt: 'publishedAt'
+        }
 
-})
+    })
 
 export default mongoose.model("blogs", blogSchema);
