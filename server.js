@@ -45,8 +45,8 @@ mongoose.connect(process.env.DB_LOCATION, {
 
 const s3 = new aws.S3({
     region: 'ap-southeast-2',
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.KEY_2,
+    secretAccessKey: process.env.KEY_1,
 });
 
 const generateUploadURL = async () => {
@@ -64,7 +64,7 @@ const generateUploadURL = async () => {
 const formatDatatoSend = (user) => {
     const access_token = jwt.sign(
         { id: user._id, admin: user.admin },
-        process.env.SECRET_ACCESS_KEY
+        process.env.KEY_3
     ); // SECRET ACCESS KEY là mã để đối chiếu có phải là người dùng không
     return {
         access_token,
@@ -92,7 +92,7 @@ const verifyJWT = (req, res, next) => {
     if (token == null) {
         return res.status(401).json({ error: "No access token " });
     } // nếu không có token thì trả về lỗi
-    jwt.verify(token, process.env.SECRET_ACCESS_KEY, (err, user) => {
+    jwt.verify(token, process.env.KEY_3, (err, user) => {
         if (err) {
             return res.status(403).json({ error: "Invalid token" });
         }
@@ -162,7 +162,7 @@ server.post('/signin', (req, res) => {
             }
             if (!user.google_auth) {
                 bcrypt.compare(password, user.personal_info.password, (err, result) => {
-                    // bcrypt.compare là hàm so sánh với mk cũ xem có đồng nhất không
+
                     if (err) {
                         return res
                             .status(403)
@@ -288,16 +288,16 @@ server.use(
     })
 );
 
-const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
-const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const KEY_2 = process.env.KEY_2;
+const KEY_1 = process.env.KEY_1;
 const S3_REGION = 'ap-southeast-2';
 const S3_BUCKET_NAME = 'blogging-website-1';
 
 const client = new S3Client({
     region: S3_REGION,
     credentials: {
-        accessKeyId: AWS_ACCESS_KEY,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+        accessKeyId: KEY_2,
+        secretAccessKey: KEY_1,
     },
 });
 
@@ -822,6 +822,8 @@ server.post("/delete-comment", verifyJWT, (req, res) => {
                 }
             })
 
+    } else {
+        return res.status(500).json({ error: "you don't have permissions to delete the blog" })
     }
 
 

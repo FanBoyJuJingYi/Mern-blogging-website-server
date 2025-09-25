@@ -1,8 +1,8 @@
-POST http://localhost:3000//delete-comment
+Get http://localhost:3000/trending-blogs
 Content-Type: application/json
 
 
 
 {
-  "blog_id": "Blog-9wBlrQFWAdJg4NKnH2m7yX"
+ "draft" : "false"
 }
