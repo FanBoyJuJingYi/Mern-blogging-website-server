@@ -35,6 +35,10 @@ const serviceAccountKey = JSON.parse(
 const server = express();
 const PORT = process.env.PORT || 3000;
 
+server.get('/', (req, res) => {
+    res.send('Server is running');
+});
+
 
 
 admin.initializeApp({
@@ -971,6 +975,7 @@ server.listen(PORT, () => {
 });
 
 export default server;
+
 
 
 
