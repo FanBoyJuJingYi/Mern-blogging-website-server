@@ -35,9 +35,7 @@ const serviceAccountKey = JSON.parse(
 const server = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send("WELCOME TO THE Blogging API");
-});
+
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccountKey),
@@ -973,6 +971,7 @@ server.listen(PORT, () => {
 });
 
 export default server;
-module.exports = app;
+
+
 
 
