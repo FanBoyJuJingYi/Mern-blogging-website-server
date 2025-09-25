@@ -973,4 +973,6 @@ server.listen(PORT, () => {
 });
 
 export default server;
+module.exports = app;
+
 
