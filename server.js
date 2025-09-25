@@ -1,11 +1,9 @@
-import express from 'express';
-import mongoose from 'mongoose';
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import admin from 'firebase-admin';
-import serviceAccountKey from './reat-js-blog-website-firebase-adminsdk-pxagl-de1b80e4f8.json' assert { type: 'json' };
+
 import { getAuth } from 'firebase-admin/auth';
 import { nanoid } from 'nanoid';
 import aws from 'aws-sdk';
@@ -14,16 +12,24 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import fs from 'fs';
 import path from 'path';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import { fileURLToPath } from 'url';
 
+import express from 'express';
+import mongoose from 'mongoose';
 
 //schema
 import User from './Schema/User.js';
 import Blog from './Schema/Blog.js';
 import Notification from "./Schema/Notification.js";
 import Comment from "./Schema/Comment.js";
-import { console } from 'inspector';
-import { populate } from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const serviceAccountKey = JSON.parse(
+    fs.readFileSync(path.join(__dirname, 'reat-js-blog-website-firebase-adminsdk-pxagl-de1b80e4f8.json'), 'utf-8')
+);
+
 
 
 const server = express();

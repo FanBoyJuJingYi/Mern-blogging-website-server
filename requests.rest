@@ -1,8 +1,0 @@
-Get http://localhost:3000/trending-blogs
-Content-Type: application/json
-
-
-
-{
- "draft" : "false"
-}
