@@ -967,3 +967,5 @@ server.post("/delete-blog", verifyJWT, (req, res) => {
 server.listen(PORT, () => {
     console.log('listening on port ->' + PORT);
 });
+
+export default server;
